@@ -1,0 +1,31 @@
+Apps/macOS/Launcher.swift
+  s_9df87a63471973::t_52537538c5afbd 1-140
+Package.resolved
+  s_9df87a63471973::t_e52110ce04ef26 1-24
+Packages/ReaderAdapters/Resources/JSDOMParser.js
+  s_9df87a63471973::t_505a5172005e20 1-1279
+Packages/ReaderAdapters/Resources/LICENSE-JSDOMParser.txt
+  s_9df87a63471973::t_d32e2549ab68b4 1-374
+README.md
+  s_9df87a63471973::t_4072e44b5b68c3 1-83
+init/ARCHITECTURE.md
+  s_9df87a63471973::t_ed18c69fc08395 1-114
+init/ENVIRONMENT.md
+  s_9df87a63471973::t_4708f2a7b7960f 1-75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "fbd144231e8cd6c17b8cd22fde1c31ee41b32133",
+  "prompts": {},
+  "sessions": {
+    "s_9df87a63471973": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bfe0-df44-75c3-8ff2-3b303320fa4a",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "pipecat <14970845+pipecat@users.noreply.github.com>"
+    }
+  }
+}
