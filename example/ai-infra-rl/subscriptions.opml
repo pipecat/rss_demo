@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+  <head>
+    <title>AI / Infra / RL</title>
+  </head>
+  <body>
+    <outline text="AI / Infra / RL" title="AI / Infra / RL">
+      <outline text="Lequn Chen" title="Lequn Chen" type="rss" xmlUrl="https://le.qun.ch/en/blog/feed.xml" htmlUrl="https://le.qun.ch/en/blog/" />
+      <outline text="Horace He — Thonk From First Principles" title="Horace He — Thonk From First Principles" type="rss" xmlUrl="https://www.thonking.ai/feed" htmlUrl="https://www.thonking.ai/" />
+      <outline text="Nathan Lambert — Interconnects" title="Nathan Lambert — Interconnects" type="rss" xmlUrl="https://www.interconnects.ai/feed" htmlUrl="https://www.interconnects.ai/" />
+      <outline text="Lilian Weng — Lil’Log" title="Lilian Weng — Lil’Log" type="rss" xmlUrl="https://lilianweng.github.io/index.xml" htmlUrl="https://lilianweng.github.io/" />
+      <outline text="苏剑林 — 科学空间" title="苏剑林 — 科学空间" type="rss" xmlUrl="https://spaces.ac.cn/feed" htmlUrl="https://spaces.ac.cn/" />
+      <outline text="Sebastian Raschka — Ahead of AI" title="Sebastian Raschka — Ahead of AI" type="rss" xmlUrl="https://magazine.sebastianraschka.com/feed" htmlUrl="https://magazine.sebastianraschka.com/" />
+      <outline text="Cameron R. Wolfe — Deep (Learning) Focus" title="Cameron R. Wolfe — Deep (Learning) Focus" type="rss" xmlUrl="https://cameronrwolfe.substack.com/feed" htmlUrl="https://cameronrwolfe.substack.com/" />
+      <outline text="杰哥的小笔记" title="杰哥的小笔记" type="rss" xmlUrl="https://jia.je/feed.xml" htmlUrl="https://jia.je/" />
+      <outline text="Hamel Husain" title="Hamel Husain" type="rss" xmlUrl="https://hamel.dev/index.xml" htmlUrl="https://hamel.dev/" />
+      <outline text="vLLM（团队博客）" title="vLLM（团队博客）" type="rss" xmlUrl="https://vllm.ai/blog/rss.xml" htmlUrl="https://vllm.ai/blog" />
+    </outline>
+  </body>
+</opml>
