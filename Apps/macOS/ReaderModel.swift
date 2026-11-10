@@ -12,6 +12,7 @@ final class ReaderModel: ObservableObject {
     @Published var filter = "all"
     @Published var search = ""
     @Published var busySources: Set<String> = []
+    @Published var preparedCount = 0
     @Published var extracting: Set<String> = []
     @Published var message: String?
     @Published var fontSize = 18
@@ -25,11 +26,15 @@ final class ReaderModel: ObservableObject {
     let service: ReaderService
     let isVisualCheck: Bool
 
-    init(service: ReaderService, visualCheck: Bool = false, livePreview: Bool = false) {
+    init(service: ReaderService, visualCheck: Bool = false, livePreview: Bool = false, prefetchedPreview: Bool = false) {
         self.service = service; self.isVisualCheck = visualCheck
         if visualCheck {
             library = livePreview ? ((try? service.load()) ?? DemoCatalog.library) : DemoCatalog.library
             if library.articles.isEmpty { library.articles = [DemoFixture.article] }
+            if prefetchedPreview && !livePreview {
+                do { library.articles = [try DemoFixture.prefetchedArticle]; library.imported = true }
+                catch { message = error.localizedDescription }
+            }
         } else {
             do { library = try service.load() ?? DemoCatalog.library }
             catch { library = DemoCatalog.library; message = "缓存读取失败：\(error.localizedDescription)。原文件未覆盖；请先备份或清除缓存。"; loadFailed = true }
@@ -79,15 +84,21 @@ final class ReaderModel: ObservableObject {
         select(articles[max(0, min(articles.count - 1, index + offset))].id)
     }
     func refresh() {
-        guard refreshTask == nil, !isVisualCheck, !loadFailed else { return }
-        library.imported = true; message = nil
+        guard refreshTask == nil, extracting.isEmpty, !isVisualCheck, !loadFailed else { return }
+        library.imported = true; message = nil; preparedCount = 0
         let sources = library.sources
+        let existing = library.articles
         busySources = Set(sources.map(\.id))
         refreshTask = Task {
             await withTaskGroup(of: (String, [Article]?, String?).self) { group in
                 for source in sources {
-                    group.addTask { [service] in
-                        do { return (source.id, try await service.fetch(source), nil) }
+                    group.addTask { [service, weak self] in
+                        do {
+                            let articles = try await service.fetch(source, existing: existing) { [weak self] article in
+                                await self?.receivePreparedArticle(article)
+                            }
+                            return (source.id, articles, nil)
+                        }
                         catch { return (source.id, nil, error.localizedDescription) }
                     }
                 }
@@ -102,6 +113,7 @@ final class ReaderModel: ObservableObject {
                             library.articles = ReaderService.merge(existing: library.articles, incoming: articles)
                             if selected == nil { selectedID = visibleArticles.first?.id }
                         }
+                        persist()
                     }
                 }
             }
@@ -109,9 +121,18 @@ final class ReaderModel: ObservableObject {
             if library.articles.isEmpty { selectedID = nil }
         }
     }
+    private func receivePreparedArticle(_ article: Article) {
+        guard !Task.isCancelled else { return }
+        library.articles.removeAll { $0.state == .demo }
+        library.articles = ReaderService.merge(existing: library.articles, incoming: [article])
+        preparedCount += 1
+        if selected == nil { selectedID = visibleArticles.first?.id }
+        // Save in batches, at each source completion, and when refresh ends/cancels.
+        if preparedCount.isMultiple(of: 10) { persist() }
+    }
     func cancelRefresh() { refreshTask?.cancel() }
     func extract() {
-        guard let article = selected, article.state != .demo, !extracting.contains(article.id) else { return }
+        guard !isRefreshing, let article = selected, article.state != .demo, !extracting.contains(article.id) else { return }
         extracting.insert(article.id)
         Task {
             do {

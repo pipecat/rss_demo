@@ -52,5 +52,6 @@ do {
     let extracted = try ReadabilityExtractor.extractHTML("<html><head><title>Research fixture</title></head><body><nav>Navigation</nav><article><h1>Research fixture</h1><p>\(prose)</p><pre><code>  preserved = True</code></pre><script>throw new Error('source script must not run')</script></article></body></html>", url: source.homepage)
     try check(extracted.contains("Careful measurement") && !extracted.contains("<script"), "bundled Readability extracts locally without source scripts")
     try check(ArticleHTML.page(DemoFixture.article, source: "Fixture").contains("script-src 'none'"), "reader CSP denies scripts and network resources")
+    try await runPrefetchChecks()
     print("\n\(checks) offline checks passed.")
 } catch { fputs("\(error.localizedDescription)\n", stderr); exit(1) }

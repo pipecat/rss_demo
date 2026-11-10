@@ -2,6 +2,26 @@ import Foundation
 import ReaderDomain
 
 public enum DemoFixture {
+    /// Offline visual fixture: a short feed excerpt and a separately extracted body.
+    public static var prefetchedArticle: Article {
+        get throws {
+            var result = article
+            result.id = "synthetic-prefetched"
+            result.sourceID = DemoCatalog.sources[0].id
+            result.title = "全文预抓取 · 本地合成验收"
+            result.url = DemoCatalog.sources[0].homepage.appendingPathComponent("synthetic-prefetch")
+            result.rawContent = "<p>订阅只提供这段摘要。</p>"
+            result.excerpt = "订阅只提供这段摘要。阅读区应直接展示提取后的完整合成文章。"
+            let body = article.readingHTML.replacingOccurrences(
+                of: "<aside class=\"image-placeholder\">▧　实验结果示意图<small>远程图片默认不加载</small></aside>",
+                with: "<img src=\"https://example.com/synthetic-figure.png\" alt=\"实验结果示意图\">")
+            let raw = "<html><head><title>全文预抓取</title></head><body><article>\(body)</article></body></html>"
+            result.fetchedPage = raw
+            result.readingHTML = try ReadabilityExtractor.extractHTML(raw, url: result.url)
+            result.state = .extracted
+            return result
+        }
+    }
     public static var article: Article {
         let body = """
         <p>这里是你的 LLM 阅读空间。围绕同一个主题，收集模型研究、推理系统和后训练实践，让信息回到适合认真阅读的节奏。</p>

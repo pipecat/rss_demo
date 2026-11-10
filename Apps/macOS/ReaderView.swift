@@ -91,7 +91,7 @@ struct ReaderView: View {
                     Spacer()
                     Button { model.isRefreshing ? model.cancelRefresh() : model.refresh() } label: {
                         Image(systemName: model.isRefreshing ? "stop.circle" : "arrow.clockwise").font(.system(size: 14)).frame(width: 26, height: 26)
-                    }.buttonStyle(.plain).help(model.isRefreshing ? "取消刷新" : "刷新订阅 ⌘R").keyboardShortcut("r", modifiers: .command)
+                    }.buttonStyle(.plain).help(model.isRefreshing ? "取消刷新" : "刷新订阅并预抓取全文 ⌘R").keyboardShortcut("r", modifiers: .command).disabled(!model.extracting.isEmpty)
                 }
                 Text(model.sourceID == nil ? "模型、推理与系统，值得慢慢读。" : "\(model.visibleArticles.count) 篇文章 · 按发布时间排序")
                     .font(.system(size: 11)).foregroundStyle(.secondary)
@@ -106,7 +106,7 @@ struct ReaderView: View {
             if !model.library.imported && !model.isVisualCheck {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("从 6 个精选来源开始").font(.system(size: 12, weight: .medium))
-                    Text("点击后直接访问这些来源；不会调用模型。") .font(.system(size: 10)).foregroundStyle(.secondary)
+                    Text("点击后获取订阅并预抓取全文，保存到本机；不会调用模型。") .font(.system(size: 10)).foregroundStyle(.secondary)
                     Button("导入并刷新") { model.refresh() }.buttonStyle(.borderedProminent).controlSize(.small)
                 }.padding(18).frame(maxWidth: .infinity, alignment: .leading).background(accent.opacity(0.06))
                 Divider()
@@ -127,7 +127,7 @@ struct ReaderView: View {
             }
             Divider()
             HStack(spacing: 6) {
-                if model.isRefreshing { ProgressView().controlSize(.mini); Text("更新 \(model.busySources.count) 个来源…") }
+                if model.isRefreshing { ProgressView().controlSize(.mini); Text("获取全文 · 已处理 \(model.preparedCount) 篇") }
                 else { Image(systemName: "clock"); Text(lastUpdate) }
                 Spacer()
                 if model.library.sources.contains(where: { $0.error != nil }) { Button("查看错误") { model.showSources = true }.buttonStyle(.plain).foregroundStyle(.orange) }
@@ -181,7 +181,7 @@ struct ReaderView: View {
                         Text(article.state.label).lineLimit(1)
                         Spacer()
                         if model.extracting.contains(article.id) { ProgressView().controlSize(.mini); Text("提取中…") }
-                        else { Button(article.state == .extracted ? "重新提取" : "提取正文") { model.extract() }.buttonStyle(.plain).foregroundStyle(accent) }
+                        else { Button(article.state == .extracted ? "重新抓取正文" : "重试获取正文") { model.extract() }.buttonStyle(.plain).foregroundStyle(accent).disabled(model.isRefreshing) }
                     }.font(.system(size: 10)).padding(.horizontal, 24).frame(height: 33).background(accent.opacity(0.045))
                     if let error = article.extractionError { Text(error).font(.caption).foregroundStyle(.orange).padding(10).frame(maxWidth: .infinity, alignment: .leading) }
                 }
@@ -221,7 +221,7 @@ struct ReaderView: View {
             HStack {
                 Button("导出主题…") { model.exportTopic() }
                 Button("清除缓存…", role: .destructive) { model.showSources = false; model.confirmClear = true }.disabled(model.isRefreshing || !model.extracting.isEmpty)
-                Spacer(); Button(model.isRefreshing ? "正在刷新…" : "刷新全部") { model.refresh() }.disabled(model.isRefreshing).buttonStyle(.borderedProminent)
+                Spacer(); Button(model.isRefreshing ? "正在获取全文…" : "刷新并获取全文") { model.refresh() }.disabled(model.isRefreshing || !model.extracting.isEmpty).buttonStyle(.borderedProminent)
             }
         }.padding(28).frame(width: 580)
     }

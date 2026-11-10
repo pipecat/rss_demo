@@ -27,11 +27,12 @@ enum Launcher {
                     for index in library.sources.indices {
                         let source = library.sources[index]
                         do {
-                            let articles = try await service.fetch(source)
+                            let articles = try await service.fetch(source, existing: library.articles)
                             library.articles.removeAll { $0.state == .demo }
                             library.articles = ReaderService.merge(existing: library.articles, incoming: articles)
                             library.sources[index].lastSuccess = Date(); library.sources[index].error = nil
-                            print("\(source.name): \(articles.count) articles")
+                            let ready = articles.filter { $0.state == .extracted }.count
+                            print("\(source.name): \(articles.count) articles, \(ready) extracted bodies, \(articles.count - ready) fallbacks")
                         } catch {
                             library.sources[index].error = error.localizedDescription
                             print("\(source.name): ERROR \(error.localizedDescription)")
@@ -63,7 +64,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         let arguments = CommandLine.arguments
         let visual = arguments.contains("--visual-check")
-        model = ReaderModel(service: service, visualCheck: visual, livePreview: arguments.contains("--live-data"))
+        model = ReaderModel(service: service, visualCheck: visual, livePreview: arguments.contains("--live-data"), prefetchedPreview: arguments.contains("--prefetched"))
         let width: CGFloat = arguments.contains("--narrow") ? 1040 : 1360
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: width, height: 860), styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView], backing: .buffered, defer: false)
         window.title = "Topic Reader — LLM"

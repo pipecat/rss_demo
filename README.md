@@ -19,13 +19,15 @@ bash scripts/build-app.sh
 .build/debug/ReaderChecks
 ```
 
-使用 Swift Package Manager，依赖固定版本并记录在 `Package.resolved`。本机 Command Line Tools 可以完成当前构建，无需先安装完整 Xcode。脚本生成本机架构的 Debug App，附带资源、许可证与临时签名；不是经过公证的正式分发版本。声明最低 macOS 14，当前只在本机 Apple Silicon / macOS 26.5.1 验证。
+使用 Swift Package Manager，依赖固定版本并记录在 `Package.resolved`，要求 Swift 6.0 或更新版本。当前本机已升级并默认使用 Xcode 26.6 / Swift 6.3.3 / macOS SDK 26.5（Apple Silicon、macOS 26.3.1），完成构建、40 项离线检查及合成文章启动渲染验证。日常开发使用 CLI 即可，无需常开 Xcode IDE；环境配置与历史验证记录见 [环境说明](init/ENVIRONMENT.md)。脚本生成本机架构的 Debug App，附带资源、许可证与临时签名；不是经过公证的正式分发版本。声明最低 macOS 14，尚未在该最低版本或 Intel Mac 实测。
 
 ## 已实现
 
 - SwiftUI 三栏原生界面：主题与来源、文章列表、隔离的 WebKit 阅读页。
 - LLM Demo 关联已有示例中的 Lequn Chen、Horace He、Interconnects、Lilian Weng、苏剑林与 vLLM 六个来源。
 - 用户主动导入刷新；不在启动时联网。显示各来源最后成功时间和错误，失败保留缓存。
+- 刷新时自动预抓取文章页面、提取并清理正文，逐篇就绪后直接在阅读区展示全文内容，无需先点提取按钮。已有正文缓存直接复用；旧摘要和失败条目会在下次成功获取订阅后补抓。
+- 六个来源并行刷新，每个来源逐篇抓取；显示已处理数量，可取消并保留已完成内容。单篇失败保留订阅内容、错误及原文入口，也可手动重试。
 - 搜索标题和摘要、来源筛选、未读筛选、收藏、字号调整、系统亮暗模式。
 - FeedKit 解析 RSS 2.0 / Atom；Readability + JSDOMParser 在无原生桥的 JavaScriptCore 内提取正文；SwiftSoup 独立清理 HTML。
 - 原始订阅内容、抓取页面与清理正文分开保存；订阅正文和提取正文都不保证完整。
@@ -76,7 +78,7 @@ rss_demo/
 
 新增实现目录：`Apps/macOS/`、`Packages/ReaderDomain/`、`Packages/ReaderApplication/`、`Packages/ReaderAdapters/`、`Tests/ReaderChecks/` 和 `scripts/`。
 
-23 项离线检查覆盖 RSS/Atom、实体声明拦截、HTML/URL 安全、结构保留、去重、缓存与真实 Readability 库执行。视觉验收使用本地合成文章，截图输出到忽略目录 `artifacts/`。
+40 项离线检查覆盖 RSS/Atom、实体声明拦截、HTML/URL 安全、结构保留、去重、缓存与真实 Readability 库执行，以及全文预抓取、旧摘要补抓、缓存复用、失败回退、取消和全文渲染。视觉验收使用本地合成文章，截图输出到忽略目录 `artifacts/`。使用 `--visual-check --prefetched` 可检查“短订阅摘要 + 独立提取的长正文”场景；此模式不联网、不写用户缓存。
 
 第三方依赖及许可见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。NetNewsWire 仅作为结构与交互参考，未复制其代码或素材；本项目自身的开源许可证尚待确定。没有接入真实模型。
 
